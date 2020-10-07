@@ -135,6 +135,13 @@ function addDepartment(){
 }
 
 function addRole(){
+    connection.query("SELECT employee.first_name, employee.last_name, role.title, role.salary, role.roleID, department.name, department.departmentID FROM employee INNER JOIN role ON employee.role_id = role.roleID INNER JOIN department ON role.department_id = department.departmentID", (err, res) => {
+        if (err) throw err
+        deptArray = []
+        for(let i = 0; i < res.length; i++){
+            deptArray.push(res[i].departmentID + " " + res[i].name)
+        }
+
     inquirer
       .prompt([
         {
@@ -149,21 +156,32 @@ function addRole(){
         },
         {
           name: 'deptID',
-          type: 'input',
-          message: 'What is the department ID of the role being added?'
-        },
+          type: 'list',
+          message: 'What is the department of the role being added?',
+          choices: deptArray
+        }
       ])
       .then((answers) => {
-        connection.query("INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)", [answers.roleName, answers.roleSalary, answers.deptID], (err, res) => {
+        const idAndName = answers.deptID.split(" ")
+        let chosenDeptID = idAndName[0]
+        connection.query("INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)", [answers.roleName, answers.roleSalary, chosenDeptID], (err, res) => {
             if(err) throw err;
             console.log("Sucessfully added role!")
             initPrompt();
         })
       })
+    })
 }
 
 
 function addEmployee(){
+    connection.query("SELECT employee.first_name, employee.last_name, role.title, role.salary, role.roleID, department.name, department.departmentID FROM employee INNER JOIN role ON employee.role_id = role.roleID INNER JOIN department ON role.department_id = department.departmentID", (err, res) => {
+        if (err) throw err
+    roleArray = []
+        for(let i = 0; i < res.length; i++){
+            roleArray.push(res[i].roleID + " " + res[i].title)
+
+        }
     inquirer
       .prompt([
         {
@@ -178,8 +196,9 @@ function addEmployee(){
         },
         {
           name: 'roleID',
-          type: 'input',
-          message: 'What is the ID for the role of the employee?'
+          type: 'list',
+          message: 'What is the role of the employee?',
+          choices: roleArray
         },
         {
           name: 'managerID',
@@ -188,20 +207,25 @@ function addEmployee(){
         },
       ])
       .then((answers) => {
-        connection.query("INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)", [answers.employeeFirst, answers.employeeLast, answers.roleID, answers.managerID], (err, res) => {
+        const idAndName = answers.roleID.split(" ")
+        let chosenRoleID = idAndName[0]
+        connection.query("INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)", [answers.employeeFirst, answers.employeeLast, chosenRoleID, answers.managerID], (err, res) => {
             if(err) throw err;
             console.log("Sucessfully added employee!")
             initPrompt();
         })
       })
+    })
 }
 
 function updateData(){
-    connection.query("SELECT * FROM employee", (err, res) => {
+    connection.query("SELECT employee.first_name, employee.last_name, employee.id, role.title, role.salary, role.roleID, department.name, department.departmentID FROM employee INNER JOIN role ON employee.role_id = role.roleID INNER JOIN department ON role.department_id = department.departmentID", (err, res) => {
         if(err) throw err;
         employeeNameArray = []
+        roleArray = []
         for(let i = 0; i < res.length; i++){
-            employeeNameArray.push(res[i].employee_id + " " + res[i].first_name + " " + res[i].last_name)
+            employeeNameArray.push(res[i].id + " " + res[i].first_name + " " + res[i].last_name)
+            roleArray.push(res[i].roleID + " " + res[i].title)
         }
         inquirer.prompt([
         {
@@ -212,14 +236,17 @@ function updateData(){
         },
         {
           name: 'desiredRole',
-          type: 'input',
-          message: 'What is the ID of the role that you would like to set to the employee?',
+          type: 'list',
+          message: 'What is the role that you would like to set to the employee?',
+          choices: roleArray
         }
       ]).then((answers) => {
           const idAndName = answers.employeeName.split(" ")
           let chosenEmployeeID = idAndName[0]
+          const idAndRole = answers.desiredRole.split(" ")
+          let chosenRoleID = idAndRole[0]
         console.log(chosenEmployeeID)
-        connection.query("UPDATE employee SET role_id = ? WHERE employee_id = ?", [answers.desiredRole, chosenEmployeeID], (err, res) => {
+        connection.query("UPDATE employee SET role_id = ? WHERE id = ?", [chosenRoleID, chosenEmployeeID], (err, res) => {
             if(err) throw err;
             console.log("Sucessfully updated the role of " + idAndName[1] + " " + idAndName[2])
             initPrompt();
