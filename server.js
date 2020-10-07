@@ -22,9 +22,6 @@ connection.connect(function(err) {
 });
 
 
-
-
-
 function initPrompt() {
     inquirer
     .prompt([
@@ -32,7 +29,7 @@ function initPrompt() {
         name: 'action',
         type: 'list',
         message: 'Would you like to view, update or add to your employment team?',
-        choices: ["Add", "View", "Update"]
+        choices: ["Add", "View", "Update", "Exit"]
       }
     ]).then((answers) =>{
         console.log(answers.action)
@@ -42,28 +39,20 @@ function initPrompt() {
             viewData();
         }else if (answers.action === "Update"){
             updateData();
+        }else if (answers.action === "Exit"){
+            connection.end();
         }
         
     })
     
 };
 
-
-
-function afterConnection() {
-    connection.query("SELECT * FROM employee", function(err, res) {
-        if (err) throw err;
-        console.table(res);
-        afterAfterConnection();
-    });
-}
-
 function addToData(){
     inquirer.prompt([
         {
         name: 'addTarget',
         type: 'list',
-        message: 'Would you like to add a department, a role or an employee?',
+        message: 'Would you like to add the departments, the roles or the employees?',
         choices: ["Department", "Role", "Employee"]
         }
     ]).then((answers) => {
@@ -79,3 +68,50 @@ function addToData(){
     })
 }
 
+function viewData(){
+    inquirer.prompt([
+        {
+        name: 'viewTarget',
+        type: 'list',
+        message: 'Would you like to view the departments, the roles or the employees?',
+        choices: ["Department", "Role", "Employee"]
+        }
+    ]).then((answers) => {
+        console.log(answers.viewTarget)
+        if(answers.viewTarget === "Department"){
+            viewDepartment();
+
+        }else if (answers.viewTarget === "Role"){
+            viewRole();
+            
+        }else if (answers.viewTarget === "Employee"){
+            viewEmployee();
+            
+        }
+        
+    })
+}
+
+function viewDepartment(){
+    connection.query("SELECT * FROM department", (err, res) => {
+        if(err) throw err;
+        console.table(res);
+        initPrompt();
+    })
+}
+
+function viewRole(){
+    connection.query("SELECT * FROM role", (err, res) => {
+        if(err) throw err;
+        console.table(res);
+        initPrompt();
+    })
+}
+
+function viewEmployee(){
+    connection.query("SELECT * FROM employee", (err, res) => {
+        if(err) throw err;
+        console.table(res);
+        initPrompt();
+    })
+}
