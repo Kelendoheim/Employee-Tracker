@@ -128,6 +128,7 @@ function addDepartment(){
       .then((answers) => {
         connection.query("INSERT INTO department (name) VALUES (?)", [answers.deptName], (err, res) => {
             if(err) throw err;
+            console.log("Sucessfully added department!")
             initPrompt();
         })
       })
@@ -155,6 +156,7 @@ function addRole(){
       .then((answers) => {
         connection.query("INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)", [answers.roleName, answers.roleSalary, answers.deptID], (err, res) => {
             if(err) throw err;
+            console.log("Sucessfully added role!")
             initPrompt();
         })
       })
@@ -188,7 +190,43 @@ function addEmployee(){
       .then((answers) => {
         connection.query("INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)", [answers.employeeFirst, answers.employeeLast, answers.roleID, answers.managerID], (err, res) => {
             if(err) throw err;
+            console.log("Sucessfully added employee!")
             initPrompt();
         })
       })
+}
+
+function updateData(){
+    connection.query("SELECT * FROM employee", (err, res) => {
+        if(err) throw err;
+        employeeNameArray = []
+        for(let i = 0; i < res.length; i++){
+            employeeNameArray.push(res[i].employee_id + " " + res[i].first_name + " " + res[i].last_name)
+        }
+        inquirer.prompt([
+        {
+          name: 'employeeName',
+          type: 'list',
+          message: 'What is the name of the employee you would like to update?',
+          choices: employeeNameArray
+        },
+        {
+          name: 'desiredRole',
+          type: 'input',
+          message: 'What is the ID of the role that you would like to set to the employee?',
+        }
+      ]).then((answers) => {
+          const idAndName = answers.employeeName.split(" ")
+          let chosenEmployeeID = idAndName[0]
+        console.log(chosenEmployeeID)
+        connection.query("UPDATE employee SET role_id = ? WHERE employee_id = ?", [answers.desiredRole, chosenEmployeeID], (err, res) => {
+            if(err) throw err;
+            console.log("Sucessfully updated the role of " + idAndName[1] + " " + idAndName[2])
+            initPrompt();
+        })
+
+        })
+      })
+
+    
 }
