@@ -115,3 +115,80 @@ function viewEmployee(){
         initPrompt();
     })
 }
+
+function addDepartment(){
+    inquirer
+      .prompt([
+        {
+          name: 'deptName',
+          type: 'input',
+          message: 'What is the name of the department you would like to add?'
+        }
+      ])
+      .then((answers) => {
+        connection.query("INSERT INTO department (name) VALUES (?)", [answers.deptName], (err, res) => {
+            if(err) throw err;
+            initPrompt();
+        })
+      })
+}
+
+function addRole(){
+    inquirer
+      .prompt([
+        {
+          name: 'roleName',
+          type: 'input',
+          message: 'What is the name of the role you would like to add?'
+        },
+        {
+          name: 'roleSalary',
+          type: 'input',
+          message: 'What is the expected salary of the role being added?'
+        },
+        {
+          name: 'deptID',
+          type: 'input',
+          message: 'What is the department ID of the role being added?'
+        },
+      ])
+      .then((answers) => {
+        connection.query("INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)", [answers.roleName, answers.roleSalary, answers.deptID], (err, res) => {
+            if(err) throw err;
+            initPrompt();
+        })
+      })
+}
+
+
+function addEmployee(){
+    inquirer
+      .prompt([
+        {
+          name: 'employeeFirst',
+          type: 'input',
+          message: 'What is the first name of the employee you would like to add?'
+        },
+        {
+          name: 'employeeLast',
+          type: 'input',
+          message: 'What is the last name of the employee being added?'
+        },
+        {
+          name: 'roleID',
+          type: 'input',
+          message: 'What is the ID for the role of the employee?'
+        },
+        {
+          name: 'managerID',
+          type: 'input',
+          message: 'What is the employee ID for the manager of the employee?'
+        },
+      ])
+      .then((answers) => {
+        connection.query("INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)", [answers.employeeFirst, answers.employeeLast, answers.roleID, answers.managerID], (err, res) => {
+            if(err) throw err;
+            initPrompt();
+        })
+      })
+}
